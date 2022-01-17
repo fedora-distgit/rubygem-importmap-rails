@@ -4,11 +4,20 @@
 Name: rubygem-%{gem_name}
 Version: 1.0.1
 Release: 1%{?dist}
-Summary: Use ESM with importmap to manage modern JavaScript in Rails without transpiling or bundling
+Summary: Manage modern JavaScript in Rails without transpiling or bundling
 License: MIT
 URL: https://github.com/rails/importmap-rails
 Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
+# To get the test suite:
+# git clone https://github.com/rails/importmap-rails.git --no-checkout
+# git -C importmap-rails archive -v -o importmap-rails-1.0.1-tests.txz v1.0.1 test/
+Source1: %{gem_name}-%{version}%{?prerelease}-tests.txz
+
+BuildRequires: ruby
 BuildRequires: ruby(release)
+# Used for sample app
+BuildRequires: rubygem(bundler)
+BuildRequires: %{_bindir}/rails
 BuildRequires: rubygems-devel
 BuildRequires: ruby >= 2.7.0
 BuildArch: noarch
@@ -27,14 +36,10 @@ BuildArch: noarch
 Documentation for %{name}.
 
 %prep
-%setup -q -n %{gem_name}-%{version}
+%setup -q -n %{gem_name}-%{version} -b1
 
 %build
-# Create the gem as gem install only works on a gem file
 gem build ../%{gem_name}-%{version}.gemspec
-
-# %%gem_install compiles any C extensions and installs the gem into ./%%gem_dir
-# by default, so that we can move it into the buildroot in %%install
 %gem_install
 
 %install
@@ -42,11 +47,24 @@ mkdir -p %{buildroot}%{gem_dir}
 cp -a .%{gem_dir}/* \
         %{buildroot}%{gem_dir}/
 
-
-
 %check
 pushd .%{gem_instdir}
-# Run the test suite.
+ln -s %{_builddir}/test
+
+echo 'gem "rails"' >> Gemfile
+echo 'gem "sqlite3"' >> Gemfile
+
+# Test requires network access
+mv test/packager_integration_test.rb{,.disable}
+
+export BUNDLE_GEMFILE="$(pwd)/Gemfile"
+
+# Tests require building rails app (currently fails)
+# Probably requires newer Rails (7.0.1)
+echo > test/dummy/config/initializers/assets.rb
+mv test/importmap_test.rb{,.disable}
+
+ruby -Ilib:test -rbundler -e 'Dir.glob "./test/**/*_test.rb", &method(:require)'
 popd
 
 %files
