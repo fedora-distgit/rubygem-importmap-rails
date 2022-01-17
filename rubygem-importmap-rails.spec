@@ -17,7 +17,8 @@ BuildRequires: ruby
 BuildRequires: ruby(release)
 # Used for sample app
 BuildRequires: rubygem(bundler)
-BuildRequires: %{_bindir}/rails
+BuildRequires: rubygem(rails)
+BuildRequires: rubygem(sqlite3)
 BuildRequires: rubygems-devel
 BuildRequires: ruby >= 2.7.0
 BuildArch: noarch
