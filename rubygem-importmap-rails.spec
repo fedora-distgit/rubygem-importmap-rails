@@ -1,8 +1,8 @@
-# Generated from importmap-rails-1.0.1.gem by gem2rpm -*- rpm-spec -*-
+# Generated from importmap-rails-1.0.3.gem by gem2rpm -*- rpm-spec -*-
 %global gem_name importmap-rails
 
 Name: rubygem-%{gem_name}
-Version: 1.0.1
+Version: 1.0.3
 Release: 1%{?dist}
 Summary: Manage modern JavaScript in Rails without transpiling or bundling
 License: MIT
@@ -10,7 +10,7 @@ URL: https://github.com/rails/importmap-rails
 Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
 # To get the test suite:
 # git clone https://github.com/rails/importmap-rails.git --no-checkout
-# git -C importmap-rails archive -v -o importmap-rails-1.0.1-tests.txz v1.0.1 test/
+# git -C importmap-rails archive -v -o importmap-rails-1.0.3-tests.txz v1.0.3 test/
 Source1: %{gem_name}-%{version}%{?prerelease}-tests.txz
 
 BuildRequires: ruby
@@ -20,8 +20,10 @@ BuildRequires: rubygem(bundler)
 BuildRequires: rubygem(rails)
 BuildRequires: rubygem(sqlite3)
 BuildRequires: rubygems-devel
-BuildRequires: ruby >= 2.7.0
 BuildArch: noarch
+# Bundles ES Module Shims
+# app/assets/javascripts/es-module-shims.js
+Provides: bundled(es-module-shims) = 1.4.1
 
 %description
 Use ESM with importmap to manage modern JavaScript in Rails without
@@ -61,7 +63,6 @@ mv test/packager_integration_test.rb{,.disable}
 export BUNDLE_GEMFILE="$(pwd)/Gemfile"
 
 # Tests require building rails app (currently fails)
-# Probably requires newer Rails (7.0.1)
 echo > test/dummy/config/initializers/assets.rb
 mv test/importmap_test.rb{,.disable}
 
@@ -82,5 +83,5 @@ popd
 %{gem_instdir}/Rakefile
 
 %changelog
-* Thu Jan 13 2022 Pavel Valena <pvalena@redhat.com> - 1.0.1-1
+* Thu Jan 13 2022 Pavel Valena <pvalena@redhat.com> - 1.0.3-1
 - Initial package
